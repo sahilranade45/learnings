@@ -1,0 +1,26 @@
+# My Learning Log
+
+## Python
+*2026-09-27 15:01*
+
+Python is a high-level, general-purpose programming language known for its simplicity, readability, and versatility. Created by Guido van Rossum and first released in 1991, it has grown to become one of the most popular programming languages in the world
+
+## C
+*2026-09-27 15:05*
+
+c is a low level language
+
+## MCP (Model Context Protocol) — theory
+*2026-09-27 16:30*
+
+MCP is a standardized protocol that lets AI applications connect to external tools and data sources without needing a custom integration for every model-tool pairing, cutting an M-models × N-tools problem down to roughly M+N. It's often compared to USB-C for AI apps: one universal connector instead of a different cable for every device.
+
+Architecture is client-host-server: the host is the AI application itself (e.g. Claude Desktop, an IDE) and manages the session and security boundaries; the client lives inside the host and keeps a dedicated 1:1 connection to a single server; the server is an external program that exposes capabilities to the client. A host can connect to many servers, but each client-server pair is isolated.
+
+Servers expose up to four kinds of primitives: Tools (functions the model can invoke to take an action, model-controlled based on name/description), Resources (read-only data the client can pull into context, like a GET endpoint), Prompts (reusable parameterized templates usually chosen explicitly by the user, e.g. a slash command), and Sampling (a less common primitive where the server can ask the client's LLM to generate a completion, borrowing the model's intelligence mid-task).
+
+Under the hood, messages use JSON-RPC 2.0, transported either via stdio (server runs as a local subprocess, communicates over standard input/output — simple and fast for local tools) or HTTP with SSE / Streamable HTTP (for remote servers that stream responses back).
+
+The connection lifecycle has four stages: Initialization (client and server handshake protocol versions and capabilities), Discovery (client asks what tools/resources/prompts the server offers and gets schemas back), Invocation (client calls a specific tool with arguments and gets a result), and Notifications (server can push updates, like a change in its tool list, without being asked).
+
+This design matters because it decouples tool authors from model providers, keeps a security boundary where the host mediates what the model can see/invoke (so a compromised server can't silently take over — humans stay in the loop for consent), and makes tool use composable across many servers.
